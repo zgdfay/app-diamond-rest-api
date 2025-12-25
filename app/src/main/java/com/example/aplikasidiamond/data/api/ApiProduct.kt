@@ -46,9 +46,24 @@ data class CreateTransactionRequest(
     @SerializedName("total_harga") val total_harga: Int
 )
 
+data class UpdateTransactionRequest(
+    @SerializedName("id") val id: Int,
+    @SerializedName("product_id") val product_id: Int,
+    @SerializedName("qty") val qty: Int,
+    @SerializedName("total_harga") val total_harga: Int
+)
+
+data class DeleteTransactionRequest(
+    @SerializedName("id") val id: Int
+)
+
 data class CreateTransactionResponse(
     @SerializedName("status") val status: String?,
     @SerializedName("message") val message: String?,
     @SerializedName("data") val data: ApiTransaction?
 )
 
+data class GenericResponse(
+    @SerializedName("status") val status: String?,
+    @SerializedName("message") val message: String?
+)

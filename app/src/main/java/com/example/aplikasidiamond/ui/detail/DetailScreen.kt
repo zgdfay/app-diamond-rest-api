@@ -1,6 +1,6 @@
 package com.example.aplikasidiamond.ui.detail
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,7 +27,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,11 +37,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.aplikasidiamond.ui.viewmodel.ProductViewModel
 import com.example.aplikasidiamond.ui.viewmodel.TransactionViewModel
@@ -87,49 +86,32 @@ fun DetailScreen(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            Box(
-                modifier = Modifier
-                    .height(300.dp)
-                    .fillMaxWidth()
-            ) {
-                when {
-                    !product.imageUrl.isNullOrEmpty() -> {
-                        // Add timestamp to force reload when image changes
-                        val imageUrlWithTimestamp = remember(product.id, product.imageUrl) {
-                            // Add hash as query parameter to force reload
-                            val hash = product.imageUrl.hashCode()
-                            if (product.imageUrl.contains("?")) {
-                                "$product.imageUrl&v=$hash"
-                            } else if (product.imageUrl.contains("data:image")) {
-                                // For data URLs, we can't add query params, so use the hash in remember
-                                product.imageUrl
-                            } else {
-                                "$product.imageUrl?v=$hash"
-                            }
-                        }
-                        AsyncImage(
-                            model = ImageRequest.Builder(context)
-                                .data(imageUrlWithTimestamp)
-                                .crossfade(false) // Disable crossfade to see immediate changes
-                                .allowHardware(false) // Important for base64 images
-                                .memoryCachePolicy(CachePolicy.DISABLED) // Disable memory cache
-                                .diskCachePolicy(CachePolicy.DISABLED) // Disable disk cache
-                                .build(),
-                            contentDescription = product.nama_produk,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop,
-                            placeholder = if (product.imageRes != 0) painterResource(id = product.imageRes) else null,
-                            error = if (product.imageRes != 0) painterResource(id = product.imageRes) else null
-                        )
-                    }
-                    product.imageRes != 0 -> {
-                        Image(
-                            painter = painterResource(id = product.imageRes),
-                            contentDescription = product.nama_produk,
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                    }
+            if (product.imageData != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(product.imageData)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = product.nama_produk,
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ShoppingCart,
+                        contentDescription = "No Image",
+                        modifier = Modifier.size(80.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
                 }
             }
             Column(modifier = Modifier.padding(16.dp)) {

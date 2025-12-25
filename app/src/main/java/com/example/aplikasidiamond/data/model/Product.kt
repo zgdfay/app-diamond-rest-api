@@ -9,12 +9,22 @@ data class Product(
     val stok: Int,
     val harga: Int,
     val deskripsi: String,
-    val imageUrl: String? = null, // URL gambar dari API
-    @DrawableRes val imageRes: Int = 0 // Fallback drawable resource
-)
+    val imageData: ByteArray? = null // Data gambar sebagai ByteArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as Product
+        if (id != other.id) return false
+        return true
+    }
+
+    override fun hashCode(): Int = id
+}
 
 data class Category(
     val id: Int,
     val name: String,
     @DrawableRes val imageUrl: Int
 )
+

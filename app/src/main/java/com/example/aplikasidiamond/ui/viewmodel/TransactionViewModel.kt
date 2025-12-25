@@ -61,8 +61,7 @@ class TransactionViewModel : ViewModel() {
                 _error.value = null
                 
                 val result = repository.createTransaction(productId, qty, totalHarga)
-                val transaction = result.getOrNull()
-                if (transaction != null) {
+                if (result.isSuccess) {
                     _isLoading.value = false
                     // Call onSuccess first, then reload transactions in background
                     onSuccess()
@@ -86,6 +85,71 @@ class TransactionViewModel : ViewModel() {
     
     fun refreshTransactions() {
         loadTransactions()
+    }
+    
+    fun updateTransaction(
+        id: Int,
+        productId: Int,
+        qty: Int,
+        totalHarga: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _error.value = null
+                
+                val result = repository.updateTransaction(id, productId, qty, totalHarga)
+                if (result.isSuccess) {
+                    _isLoading.value = false
+                    onSuccess()
+                    loadTransactions()
+                } else {
+                    val exception = result.exceptionOrNull()
+                    val errorMessage = exception?.message ?: "Failed to update transaction"
+                    _error.value = errorMessage
+                    _isLoading.value = false
+                    onError(errorMessage)
+                }
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Unexpected error occurred"
+                _error.value = errorMessage
+                _isLoading.value = false
+                onError(errorMessage)
+            }
+        }
+    }
+    
+    fun deleteTransaction(
+        id: Int,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                _error.value = null
+                
+                val result = repository.deleteTransaction(id)
+                if (result.isSuccess) {
+                    _isLoading.value = false
+                    onSuccess()
+                    loadTransactions()
+                } else {
+                    val exception = result.exceptionOrNull()
+                    val errorMessage = exception?.message ?: "Failed to delete transaction"
+                    _error.value = errorMessage
+                    _isLoading.value = false
+                    onError(errorMessage)
+                }
+            } catch (e: Exception) {
+                val errorMessage = e.message ?: "Unexpected error occurred"
+                _error.value = errorMessage
+                _isLoading.value = false
+                onError(errorMessage)
+            }
+        }
     }
 }
 

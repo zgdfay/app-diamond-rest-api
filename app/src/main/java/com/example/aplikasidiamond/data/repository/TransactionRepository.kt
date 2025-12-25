@@ -4,6 +4,7 @@ import com.example.aplikasidiamond.data.api.ApiTransaction
 import com.example.aplikasidiamond.data.api.ApiService
 import com.example.aplikasidiamond.data.api.CreateTransactionRequest
 import com.example.aplikasidiamond.data.api.RetrofitClient
+import com.example.aplikasidiamond.data.api.UpdateTransactionRequest
 import com.example.aplikasidiamond.data.model.Transaction
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,7 +32,7 @@ class TransactionRepository {
         productId: Int,
         qty: Int,
         totalHarga: Int
-    ): Result<Transaction> {
+    ): Result<Unit> {
         return try {
             val request = CreateTransactionRequest(
                 product_id = productId,
@@ -40,14 +41,46 @@ class TransactionRepository {
             )
             val response = apiService.createTransaction(request)
             if (response.isSuccessful && response.body() != null) {
-                val apiTransaction = response.body()!!.data
-                if (apiTransaction != null) {
-                    Result.success(apiTransaction.toTransaction())
-                } else {
-                    Result.failure(Exception("Transaction data is null"))
-                }
+                Result.success(Unit)
             } else {
                 Result.failure(Exception("Failed to create transaction: ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun updateTransaction(
+        id: Int,
+        productId: Int,
+        qty: Int,
+        totalHarga: Int
+    ): Result<Unit> {
+        return try {
+            val request = UpdateTransactionRequest(
+                id = id,
+                product_id = productId,
+                qty = qty,
+                total_harga = totalHarga
+            )
+            val response = apiService.updateTransaction(id, request)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to update transaction: ${response.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    
+    suspend fun deleteTransaction(id: Int): Result<Unit> {
+        return try {
+            val response = apiService.deleteTransaction(id)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to delete transaction: ${response.message()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
